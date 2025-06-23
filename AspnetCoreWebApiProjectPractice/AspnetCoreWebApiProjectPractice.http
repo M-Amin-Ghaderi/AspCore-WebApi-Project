@@ -1,0 +1,6 @@
+@AspnetCoreWebApiProjectPractice_HostAddress = http://localhost:5124
+
+GET {{AspnetCoreWebApiProjectPractice_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
