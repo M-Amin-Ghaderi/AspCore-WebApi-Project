@@ -1,14 +1,8 @@
-﻿using AspnetCoreWebApiProjectPractice.Context;
-using AspnetCoreWebApiProjectPractice.DTO.Book;
+﻿using AspnetCoreWebApiProjectPractice.DTO.Book;
 using AspnetCoreWebApiProjectPractice.Models;
-using AspnetCoreWebApiProjectPractice.Repositories;
-using AutoMapper;
+using AspnetCoreWebApiProjectPractice.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Collections;
-using System.Threading.Tasks;
 
 namespace AspnetCoreWebApiProjectPractice.Controllers
 {
@@ -17,33 +11,31 @@ namespace AspnetCoreWebApiProjectPractice.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly MyAppDbContext dbContext;
-        private readonly IBookRepository repo;
-        private readonly IMapper mapper;
+        private readonly IBookService bookService;
 
-        public BooksController(IBookRepository repo, IMapper mapper)
+        public BooksController(IBookService bookService)
         {
-            this.repo = repo;
-            this.mapper = mapper;
+            this.bookService = bookService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks()
         {
-            var books = await repo.GetAllAsync();
-            return mapper.Map<List<Book>>(books);
+            return bookService.GetAllAsync() is Task<IEnumerable<BookDto>> books
+                ? Ok(await books)
+                : NotFound();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Book>> GetBook(int id)
         {
-            var book = await repo.GetByIdAsync(id);
+            var book = await bookService.GetByIdAsync(id);
 
             if (book == null)
             {
                 return NotFound();
             }
-            return Ok(mapper.Map<Book>(book));
+            return Ok(book);
         }
 
         [HttpPost]
@@ -52,24 +44,23 @@ namespace AspnetCoreWebApiProjectPractice.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (createBookDto is null) return BadRequest(ModelState);
 
-            var book = mapper.Map<Book>(createBookDto);
-
-            await repo.AddAsync(book);
-            await repo.SaveChangesAsync();
+            var book = await bookService.CreateAsync(createBookDto);
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Book>> UpdateBook(int id, Book book)
+        public async Task<ActionResult<Book>> UpdateBook(int id, BookDto book)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (id != book.Id)
             {
                 return BadRequest();
             }
-
-            repo.Update(book);
-            await repo.SaveChangesAsync();
+            await bookService.UpdateAsync(id, new CreateBookDto
+            {
+                Title = book.Title,
+                Author = book.Author
+            });
 
             return NoContent();
         }
@@ -77,11 +68,8 @@ namespace AspnetCoreWebApiProjectPractice.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Book>> DeleteBook(int id)
         {
-            var book = await repo.GetByIdAsync(id);
-            if (book is null) return NotFound();
-
-            repo.Delete(book);
-            await repo.SaveChangesAsync();
+            var deleted = await bookService.DeletAsync(id);
+            if (!deleted) return NotFound();
             return NoContent();
         }
     }

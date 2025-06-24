@@ -1,5 +1,6 @@
 using AspnetCoreWebApiProjectPractice.Context;
 using AspnetCoreWebApiProjectPractice.Repositories;
+using AspnetCoreWebApiProjectPractice.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -43,10 +44,13 @@ builder.Services.AddSwaggerGen(c =>
 
 
 });
+
 builder.Services.AddDbContext<MyAppDbContext>(opt =>
 opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IBookService, BookService>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
