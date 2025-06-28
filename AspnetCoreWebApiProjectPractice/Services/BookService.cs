@@ -2,6 +2,7 @@
 using AspnetCoreWebApiProjectPractice.Models;
 using AspnetCoreWebApiProjectPractice.Repositories;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspnetCoreWebApiProjectPractice.Services
 {
@@ -15,9 +16,18 @@ namespace AspnetCoreWebApiProjectPractice.Services
             this.repo = repo;
             this.mapper = mapper;
         }
-        public async Task<IEnumerable<BookDto>> GetAllAsync()
+        public async Task<IEnumerable<BookDto>> GetAllAsync(BookQueryParameters query)
         {
-            var books = await repo.GetAllAsync();
+            var bookQuery = repo.Query();
+            if (!string.IsNullOrEmpty(query.Search))
+            {
+                bookQuery = bookQuery.Where(book => book.Title.Contains(query.Search));
+            }
+            bookQuery = bookQuery
+                .Skip((query.Page - 1) * query.PageSize)
+                .Take(query.PageSize);
+
+            var books = await bookQuery.ToListAsync();
             return mapper.Map<List<BookDto>>(books);
         }
         public async Task<BookDto> GetByIdAsync(int id)

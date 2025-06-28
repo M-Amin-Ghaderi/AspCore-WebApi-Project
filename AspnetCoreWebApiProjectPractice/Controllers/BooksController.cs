@@ -19,9 +19,9 @@ namespace AspnetCoreWebApiProjectPractice.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks()
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks([FromQuery]BookQueryParameters query)
         {
-            return bookService.GetAllAsync() is Task<IEnumerable<BookDto>> books
+            return bookService.GetAllAsync(query) is Task<IEnumerable<BookDto>> books
                 ? Ok(await books)
                 : NotFound();
         }

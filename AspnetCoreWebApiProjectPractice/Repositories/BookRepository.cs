@@ -39,6 +39,9 @@ namespace AspnetCoreWebApiProjectPractice.Repositories
             return await dbContext.SaveChangesAsync() > 0;
         }
 
-
+        public IQueryable<Book> Query()
+        {
+            return dbContext.Books.AsQueryable();
+        }
     }
 }
