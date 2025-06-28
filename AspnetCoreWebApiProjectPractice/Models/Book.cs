@@ -15,5 +15,7 @@ namespace AspnetCoreWebApiProjectPractice.Models
         [Required(ErrorMessage = "نام نویسنده الزامی است")]
         [MaxLength(50)]
         public string Author { get; set; }
+
+        public string? ImageUrl { get; set; }
     }
 }

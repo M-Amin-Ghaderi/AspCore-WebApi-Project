@@ -7,6 +7,7 @@ namespace AspnetCoreWebApiProjectPractice.DTO.Book
         public int Id { get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
+        public string? ImageUrl { get; set; }
     }
 
     public class CreateBookDto
@@ -20,5 +21,7 @@ namespace AspnetCoreWebApiProjectPractice.DTO.Book
         [Required(ErrorMessage = "نام نویسنده الزامی است")]
         [MaxLength(50)]
         public string Author { get; set; }
+
+        public string? ImageUrl { get; set; }
     }
 }

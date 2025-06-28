@@ -19,7 +19,7 @@ namespace AspnetCoreWebApiProjectPractice.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks([FromQuery]BookQueryParameters query)
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks([FromQuery] BookQueryParameters query)
         {
             return bookService.GetAllAsync(query) is Task<IEnumerable<BookDto>> books
                 ? Ok(await books)
@@ -71,6 +71,31 @@ namespace AspnetCoreWebApiProjectPractice.Controllers
             var deleted = await bookService.DeletAsync(id);
             if (!deleted) return NotFound();
             return NoContent();
+        }
+
+
+        [HttpPost("upload")]
+        public async Task<ActionResult> UploadImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("فایل نامعتبر است");
+            }
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+            var uniqueFileName = Guid.NewGuid().ToString().Replace("-", "") + Path.GetExtension(file.FileName);
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            var fileUrl = $"{Request.Scheme}://{Request.Host}/Uploads/{uniqueFileName}";
+
+            return Ok(new { fileUrl });
         }
     }
 }
