@@ -77,7 +77,10 @@ namespace AspnetCoreWebApiProjectPractice.Controllers
         [HttpPost("upload")]
         public async Task<ActionResult> UploadImage(IFormFile file)
         {
-            if (file == null || file.Length == 0)
+            if (file == null || file.Length == 0 ||
+                file.ContentType != "image/png" &&
+                file.ContentType != "image/jpg" &&
+                file.ContentType != "image/jpeg")
             {
                 return BadRequest("فایل نامعتبر است");
             }
